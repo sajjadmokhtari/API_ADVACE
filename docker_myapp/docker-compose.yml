@@ -1,32 +1,41 @@
+version: "3.9"
+
 services:
   postgres:
-    image: postgres
-    container_name: postgres_MarketPlace
+    image: postgres:15
+    container_name: myapp_postgres  
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: MarketPlace_db  
+      POSTGRES_DB: app_db  
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - myapp_postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
-      - MarketPlace_network
+      - myapp_network
     restart: unless-stopped
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: pgadmin_MarketPlace
+    container_name: myapp_pgadmin  
     environment:
       PGADMIN_DEFAULT_EMAIL: sajjadmokhtari386@gmail.com
       PGADMIN_DEFAULT_PASSWORD: 123456789
     volumes:
-      - pgadmin:/var/lib/pgadmin
+      - myapp_pgadmin_data:/var/lib/pgadmin
     ports:
       - "8090:80"
     networks:
-      - MarketPlace_network
+      - myapp_network
     restart: unless-stopped
     depends_on:
       - postgres
+
+networks:
+  myapp_network:
+
+volumes:
+  myapp_postgres_data:
+  myapp_pgadmin_data:
