@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>ثبت و نمایش توضیحات</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .desc-box {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 400px;
+      text-align: center;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      resize: none;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #218838;
+    }
+    .message {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .desc-list {
+      margin-top: 20px;
+      text-align: right;
+      max-height: 200px;
+      overflow-y: auto;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+    .desc-item {
+      background: #f8f9fa;
+      padding: 8px;
+      margin-bottom: 6px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="desc-box">
+    <h2>ثبت توضیحات</h2>
+    <textarea id="description" placeholder="توضیحات خود را وارد کنید..."></textarea>
+    <button onclick="submitDescription()">ارسال</button>
+    <button onclick="loadDescriptions()">نمایش همه توضیحات</button>
+    <div class="message" id="message"></div>
+    <div class="desc-list" id="descList"></div>
+  </div>
+
+  <script>
+    async function submitDescription() {
+      const desc = document.getElementById("description").value;
+      const messageBox = document.getElementById("message");
+
+      try {
+        const response = await fetch("http://localhost:8080/description", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description: desc })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          messageBox.style.color = "green";
+          messageBox.innerText = result.message || "توضیحات با موفقیت ثبت شد!";
+          document.getElementById("description").value = "";
+        } else {
+          messageBox.style.color = "red";
+          messageBox.innerText = result.error || "خطا در ثبت توضیحات";
+        }
+      } catch (err) {
+        messageBox.style.color = "red";
+        messageBox.innerText = "ارتباط با سرور برقرار نشد!";
+      }
+    }
+
+    async function loadDescriptions() {
+      const listBox = document.getElementById("descList");
+      listBox.innerHTML = "در حال بارگذاری...";
+
+      try {
+        const response = await fetch("http://localhost:8080/descriptions");
+        const result = await response.json();
+
+        if (response.ok && result.data) {
+          listBox.innerHTML = "";
+          result.data.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "desc-item";
+            div.textContent = item.Description;
+            listBox.appendChild(div);
+          });
+        } else {
+          listBox.innerHTML = "هیچ توضیحی یافت نشد.";
+        }
+      } catch (err) {
+        listBox.innerHTML = "خطا در واکشی توضیحات.";
+      }
+    }
+  </script>
+</body>
+</html>
